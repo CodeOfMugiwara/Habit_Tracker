@@ -733,7 +733,7 @@
                 <div class="legend" id="moodLegend"></div>
             </div>
 
-            <div class="quote">"Krishna remember — Reality IS negotiable"</div>
+            <div class="quote" id="trackerQuote">"Krishna remember — Reality IS negotiable"</div>
         </div>
 
         <!-- Dashboard Page -->
@@ -801,6 +801,19 @@
                 <div class="subtitle">Customize your tracker</div>
             </header>
             <div class="section">
+                <div class="setup-section" style="margin-bottom:30px;">
+                    <h3>Tracker Title</h3>
+                    <div class="setup-item">
+                        <input type="text" id="setupTitle" value="Being New Version of Me Challenge" style="flex:1;">
+                    </div>
+                    <h3 style="margin-top:20px;">Your Name</h3>
+                    <div class="setup-item">
+                        <input type="text" id="setupName" value="Krishna" placeholder="Name for the quote" style="flex:1;">
+                    </div>
+                    <div class="setup-actions" style="margin-top:16px;">
+                        <button class="btn btn-accent" id="saveSetupBtn">Save Changes</button>
+                    </div>
+                </div>
                 <div class="setup-grid">
                     <div class="setup-section">
                         <h3>Habits</h3>
@@ -881,7 +894,7 @@
         const MONTH_KEY = `${CURRENT_YEAR}-${String(CURRENT_MONTH + 1).padStart(2, '0')}`;
 
         // ── Config & Data ──
-        let config = { habits: [...DEFAULT_HABITS], moods: DEFAULT_MOODS.map(m => ({...m})) };
+        let config = { title: 'Being New Version of Me Challenge', name: 'Krishna', habits: [...DEFAULT_HABITS], moods: DEFAULT_MOODS.map(m => ({...m})) };
         let allData = {}; // { "2026-09": { habits: {}, mood: {}, notes: {} } }
 
         function loadData() {
@@ -891,6 +904,8 @@
                     const p = JSON.parse(saved);
                     allData = p.allData || {};
                     if (p.config) {
+                        config.title = p.config.title || 'Being New Version of Me Challenge';
+                        config.name = p.config.name || 'Krishna';
                         config.habits = p.config.habits || [...DEFAULT_HABITS];
                         config.moods = p.config.moods || DEFAULT_MOODS.map(m => ({...m}));
                     }
@@ -1008,7 +1023,9 @@
             const key = `${year}-${String(month + 1).padStart(2, '0')}`;
             const data = getMonthData(key);
 
+            document.getElementById('trackerTitle').textContent = config.title;
             document.getElementById('trackerSubtitle').textContent = `${MONTH_NAMES[month]} ${year} — Progress Tracker`;
+            document.getElementById('trackerQuote').textContent = `"${config.name} remember — Reality IS negotiable"`;
 
             buildDayHeaders('habitDayHeaders', days, offset, isCurrentMonth);
             buildDayHeaders('moodDayHeaders', days, offset, isCurrentMonth);
@@ -1388,6 +1405,8 @@
 
         // ── Setup ──
         function buildSetup() {
+            document.getElementById('setupTitle').value = config.title;
+            document.getElementById('setupName').value = config.name;
             const habitsContainer = document.getElementById('setupHabits');
             habitsContainer.innerHTML = '';
             config.habits.forEach((habit, i) => {
@@ -1520,10 +1539,19 @@
             document.getElementById('saveMoodsBtn').style.display = 'none';
         });
 
+        document.getElementById('saveSetupBtn').addEventListener('click', () => {
+            const title = document.getElementById('setupTitle').value.trim();
+            const name = document.getElementById('setupName').value.trim();
+            if (title) config.title = title;
+            if (name) config.name = name;
+            saveData();
+            buildTracker(CURRENT_YEAR, CURRENT_MONTH, true);
+        });
+
         document.getElementById('resetAllBtn').addEventListener('click', () => {
             if (confirm('Delete all tracker data? This cannot be undone.')) {
                 allData = {};
-                config = { habits: [...DEFAULT_HABITS], moods: DEFAULT_MOODS.map(m => ({...m})) };
+                config = { title: 'Being New Version of Me Challenge', name: 'Krishna', habits: [...DEFAULT_HABITS], moods: DEFAULT_MOODS.map(m => ({...m})) };
                 saveData();
                 buildTracker(CURRENT_YEAR, CURRENT_MONTH, true);
                 buildSetup();
