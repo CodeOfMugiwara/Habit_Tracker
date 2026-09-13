@@ -131,13 +131,13 @@ h3{font-size:16px;font-weight:600}
 .insight-card .lbl{font-size:11px;color:var(--text-muted)}
 .insight-bar{height:6px;background:var(--border);border-radius:3px;margin-top:8px;overflow:hidden}
 .insight-bar-fill{height:100%;border-radius:3px}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.cal-head{font-size:11px;font-weight:600;color:var(--text-muted);text-align:center;padding:6px}
-.cal-day{aspect-ratio:1;border-radius:var(--radius-xs);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s;background:var(--surface);gap:2px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-head{font-size:11px;font-weight:600;color:var(--text-muted);text-align:center;padding:6px 0}
+.cal-day{aspect-ratio:1;border-radius:var(--radius-xs);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s;background:var(--surface);gap:1px;padding:2px}
 .cal-day:hover{border-color:var(--primary)}
 .cal-day.today{border-color:var(--primary);font-weight:700;color:var(--primary)}
 .cal-day.empty{border-color:transparent;background:transparent;cursor:default}
-.cal-day .cal-emoji{font-size:14px}
+.cal-day .cal-emoji{font-size:12px}
 .note-icon{width:28px;height:28px;border-radius:var(--radius-xs);border:1.5px dashed var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted);transition:all .12s}
 .note-icon:hover{border-color:var(--primary);color:var(--primary)}
 .note-icon.has{background:var(--accent);border-style:solid;border-color:var(--primary);color:var(--primary)}
@@ -166,7 +166,29 @@ h3{font-size:16px;font-weight:600}
 .setup-item.dragging{opacity:.5}
 .setup-actions{display:flex;gap:10px;margin-top:12px}
 .quote{text-align:center;font-style:italic;color:var(--text-muted);font-size:14px;margin-top:32px;padding:20px}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:160px;padding:10px 0}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--primary),var(--secondary));transition:height .4s;min-height:2px;cursor:pointer}
+.bar:hover{opacity:.8}
+.bar-lbl{font-size:9px;color:var(--text-muted)}
+.heatmap{overflow-x:auto}
+.heatmap-row{display:flex;align-items:center;gap:2px;margin-bottom:2px}
+.heatmap-label{width:120px;min-width:120px;font-size:11px;font-weight:500;text-align:right;padding-right:8px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.heatmap-cell{width:20px;height:20px;border-radius:3px;transition:all .15s;cursor:pointer}
+.heatmap-cell:hover{transform:scale(1.2);z-index:1}
+.heatmap-day-labels{display:flex;gap:2px;margin-left:122px;margin-bottom:4px}
+.heatmap-day-lbl{width:20px;text-align:center;font-size:8px;color:var(--text-muted)}
 .deco{position:fixed;bottom:20px;right:30px;font-size:48px;opacity:.08;pointer-events:none;user-select:none}
+
+/* ── Welcome Popup ── */
+.welcome-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center}
+.welcome-backdrop.active{display:flex}
+.welcome-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;position:relative;overflow:hidden}
+.welcome-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--secondary),var(--primary))}
+.welcome-card h2{font-size:22px;font-weight:700;margin-bottom:8px}
+.welcome-card p{font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:20px;white-space:pre-wrap}
+.welcome-card .welcome-emoji{font-size:48px;margin-bottom:12px;display:block}
+.welcome-card .btn{min-width:160px}
 </style>
 </head>
 <body>
@@ -261,9 +283,25 @@ h3{font-size:16px;font-weight:600}
 <div class="page" id="page-stats">
 <h1 style="margin-bottom:20px">Stats</h1>
 <div class="stats-grid" id="statsGrid"></div>
-<div class="card" style="margin-top:20px">
-<div class="card-title">Habit Completion</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+<div class="card">
+<div class="card-title">📈 Daily Completion</div>
+<div id="statsBarChart"></div>
+</div>
+<div class="card">
+<div class="card-title">🏆 Habit Completion</div>
 <div id="habitStats"></div>
+</div>
+</div>
+<div class="card" style="margin-top:20px">
+<div class="card-title">🗓️ Habit Consistency</div>
+<div style="display:flex;gap:12px;margin-bottom:12px;font-size:12px;color:var(--text-muted)">
+<div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:2px;background:var(--done)"></div>Done</div>
+<div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:2px;background:var(--partial)"></div>Partial</div>
+<div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:2px;background:var(--missed)"></div>Missed</div>
+<div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:2px;background:var(--surface-alt)"></div>No data</div>
+</div>
+<div id="statsHeatmap"></div>
 </div>
 </div>
 
@@ -273,12 +311,14 @@ h3{font-size:16px;font-weight:600}
 <div class="month" id="calMonth"></div>
 <button class="date-btn" id="calNext">›</button>
 </div>
+<div style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start">
 <div class="card">
 <div class="cal-grid" id="calGrid"></div>
 </div>
-<div class="card" style="margin-top:20px">
+<div class="card">
 <div class="card-title">📝 Notes</div>
 <div id="calNotes"></div>
+</div>
 </div>
 </div>
 
@@ -289,6 +329,8 @@ h3{font-size:16px;font-weight:600}
 <div class="setup-item"><input type="text" id="setupTitle"></div>
 <div class="card-title" style="margin-top:16px">Your Name</div>
 <div class="setup-item"><input type="text" id="setupName" placeholder="Name for the quote"></div>
+<div class="card-title" style="margin-top:16px">Welcome Message</div>
+<div class="setup-item"><textarea id="setupWelcomeMsg" placeholder="Message shown on site open" rows="3" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-xs);padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;resize:vertical"></textarea></div>
 <div class="setup-actions"><button class="btn btn-p btn-sm" id="saveSetupBtn">Save</button></div>
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
@@ -320,6 +362,15 @@ h3{font-size:16px;font-weight:600}
 </div>
 </div>
 
+<div class="welcome-backdrop" id="welcomeBackdrop">
+<div class="welcome-card">
+<span class="welcome-emoji">🌟</span>
+<h2 id="welcomeTitle">Welcome back!</h2>
+<p id="welcomeMsg">Small steps, big changes. You're doing great!</p>
+<button class="btn btn-p" id="welcomeClose">Let's Go 🚀</button>
+</div>
+</div>
+
 <script>
 const DEF_HABITS=[
 {name:'Drink Water',emoji:'💧'},{name:'Exercise',emoji:'💪'},{name:'Read a Book',emoji:'📖'},
@@ -347,7 +398,7 @@ const CY=now.getFullYear(),CM=now.getMonth(),CD=now.getDate();
 const DIM=new Date(CY,CM+1,0).getDate();
 const FDO=new Date(CY,CM,1).getDay();
 const MK=`${CY}-${String(CM+1).padStart(2,'0')}`;
-let config={title:'Being New Version of Me Challenge',name:'Krishna',habits:JSON.parse(JSON.stringify(DEF_HABITS)),moods:JSON.parse(JSON.stringify(DEF_MOODS))};
+let config={title:'Being New Version of Me Challenge',name:'Krishna',welcomeMsg:'Small steps, big changes. You\'re doing great!',habits:JSON.parse(JSON.stringify(DEF_HABITS)),moods:JSON.parse(JSON.stringify(DEF_MOODS))};
 let allData={};
 let graphHoverOn=true;
 let navYear=CY,navMonth=CM;
@@ -356,8 +407,8 @@ function gmd(k){if(!allData[k])allData[k]={habits:{},mood:{},notes:{}};return al
 function dim(y,m){return new Date(y,m+1,0).getDate()}
 function fdo(y,m){return new Date(y,m,1).getDay()}
 
-function load(){try{const s=localStorage.getItem(SK);if(s){const p=JSON.parse(s);allData=p.data||{};if(p.cfg){config.title=p.cfg.t||config.title;config.name=p.cfg.n||config.name;config.habits=p.cfg.h||config.habits;config.moods=JSON.parse(JSON.stringify(DEF_MOODS))}}}catch(e){}}
-function save(){try{localStorage.setItem(SK,JSON.stringify({data:allData,cfg:{t:config.title,n:config.name,h:config.habits,m:config.moods},dark:document.body.dataset.theme==='dark',gh:graphHoverOn}))}catch(e){}}
+function load(){try{const s=localStorage.getItem(SK);if(s){const p=JSON.parse(s);allData=p.data||{};if(p.cfg){config.title=p.cfg.t||config.title;config.name=p.cfg.n||config.name;config.welcomeMsg=p.cfg.w||config.welcomeMsg;config.habits=p.cfg.h||config.habits;config.moods=JSON.parse(JSON.stringify(DEF_MOODS))}}}catch(e){}}
+function save(){try{localStorage.setItem(SK,JSON.stringify({data:allData,cfg:{t:config.title,n:config.name,w:config.welcomeMsg,h:config.habits,m:config.moods},dark:document.body.dataset.theme==='dark',gh:graphHoverOn}))}catch(e){}}
 function loadPrefs(){try{const s=localStorage.getItem(SK);if(s){const p=JSON.parse(s);if(p.dark)setDark(true);if(p.gh===false)setGH(false)}}catch(e){}}
 
 document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>navTo(b.dataset.page)));
@@ -603,14 +654,50 @@ document.getElementById('statsGrid').innerHTML=`
 <div class="stat-card"><div class="stat-value">${totalDone}</div><div class="stat-label">Habits Done</div></div>
 <div class="stat-card"><div class="stat-value">${moodCnt}</div><div class="stat-label">Moods Logged</div></div>
 <div class="stat-card"><div class="stat-value">${noteCnt}</div><div class="stat-label">Notes</div></div>`;
+
+// Daily Completion Bar Chart
+const bc=document.getElementById('statsBarChart');
+let bcHtml='<div class="bar-chart">';
+for(let i=1;i<=DIM;i++){
+let dayDone=0;
+config.habits.forEach((_,hi)=>{if(d.habits[`${hi}_${i}`]==='d')dayDone++});
+const pct=config.habits.length>0?Math.round(dayDone/config.habits.length*100):0;
+bcHtml+=`<div class="bar-col"><div class="bar" style="height:${Math.max(pct,2)}%" title="Day ${i}: ${dayDone}/${config.habits.length} (${pct}%)"></div><div class="bar-lbl">${i}</div></div>`;
+}
+bcHtml+='</div>';
+bc.innerHTML=bcHtml;
+
+// Habit Completion Rates
 const cs=['#A78BFA','#86D6BF','#FCD34D','#FC5A5A','#F472B6','#818CF8','#34D399','#FBBF24','#F87171','#C4B5FD','#6EE7B7','#FDE68A','#FCA5A5','#E879F9'];
 const hs=document.getElementById('habitStats');hs.innerHTML='';
 config.habits.forEach((h,hi)=>{
 let done=0,total=0;
 for(let i=1;i<=DIM;i++){const s=d.habits[`${hi}_${i}`];if(s){total++;if(s==='d')done++}}
 const pct=total>0?Math.round(done/total*100):0;
-hs.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="width:24px;text-align:center;font-size:16px">${h.emoji}</span><span style="width:180px;font-size:13px;font-weight:500">${h.name}</span><div style="flex:1;height:10px;background:var(--surface-alt);border-radius:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${cs[hi%cs.length]};border-radius:5px"></div></div><span style="width:40px;text-align:right;font-size:13px;font-weight:600;color:var(--text-muted)">${pct}%</span></div>`;
+hs.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="width:24px;text-align:center;font-size:16px">${h.emoji}</span><span style="width:140px;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.name}</span><div style="flex:1;height:8px;background:var(--surface-alt);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${cs[hi%cs.length]};border-radius:4px"></div></div><span style="width:36px;text-align:right;font-size:12px;font-weight:600;color:var(--text-muted)">${pct}%</span></div>`;
 });
+
+// Habit Consistency Heatmap
+const hm=document.getElementById('statsHeatmap');
+let hmHtml='';
+// Day labels
+hmHtml+='<div class="heatmap-day-labels">';
+for(let i=1;i<=DIM;i++)hmHtml+=`<div class="heatmap-day-lbl">${i}</div>`;
+hmHtml+='</div>';
+// Habit rows
+config.habits.forEach((h,hi)=>{
+hmHtml+=`<div class="heatmap-row"><div class="heatmap-label">${h.emoji} ${h.name}</div>`;
+for(let i=1;i<=DIM;i++){
+const s=d.habits[`${hi}_${i}`]||'';
+let bg='var(--surface-alt)';
+if(s==='d')bg='var(--done)';
+else if(s==='p')bg='var(--partial)';
+else if(s==='m')bg='var(--missed)';
+hmHtml+=`<div class="heatmap-cell" style="background:${bg}" title="${h.name} - Day ${i}: ${s==='d'?'Done':s==='p'?'Partial':s==='m'?'Missed':'No data'}"></div>`;
+}
+hmHtml+='</div>';
+});
+hm.innerHTML=hmHtml;
 }
 
 let calNavY=CY,calNavM=CM;
@@ -666,6 +753,7 @@ if(document.getElementById('page-calendar').classList.contains('active'))buildCa
 function buildSettings(){
 document.getElementById('setupTitle').value=config.title;
 document.getElementById('setupName').value=config.name;
+document.getElementById('setupWelcomeMsg').value=config.welcomeMsg;
 const hc=document.getElementById('setupHabits');hc.innerHTML='';
 config.habits.forEach((h,i)=>{
 const item=document.createElement('div');item.className='setup-item';item.dataset.i=i;
@@ -706,13 +794,26 @@ window.rmHabit=i=>{if(config.habits.length<=1)return;config.habits.splice(i,1);b
 window.rmMood=i=>{if(config.moods.length<=1)return;config.moods.splice(i,1);buildSettings();document.getElementById('saveMoodsBtn').style.display='inline-block'};
 document.getElementById('addHabitBtn').addEventListener('click',()=>{config.habits.push({name:'New Habit',emoji:'📝'});buildSettings();document.getElementById('saveHabitsBtn').style.display='inline-block'});
 document.getElementById('addMoodBtn').addEventListener('click',()=>{const mx=Math.max(...config.moods.map(m=>m.value));config.moods.push({label:'New Mood',emoji:'❓',color:'#9CA3AF',value:mx+1});buildSettings();document.getElementById('saveMoodsBtn').style.display='inline-block'});
-document.getElementById('saveSetupBtn').addEventListener('click',()=>{const t=document.getElementById('setupTitle').value.trim(),n=document.getElementById('setupName').value.trim();if(t)config.title=t;if(n)config.name=n;save();buildHome()});
+document.getElementById('saveSetupBtn').addEventListener('click',()=>{const t=document.getElementById('setupTitle').value.trim(),n=document.getElementById('setupName').value.trim(),w=document.getElementById('setupWelcomeMsg').value.trim();if(t)config.title=t;if(n)config.name=n;if(w)config.welcomeMsg=w;save();buildHome()});
 document.getElementById('saveHabitsBtn').addEventListener('click',()=>{document.querySelectorAll('.habit-name-inp').forEach(inp=>{config.habits[+inp.dataset.i].name=inp.value||'Unnamed'});document.querySelectorAll('.habit-emoji-inp').forEach(inp=>{config.habits[+inp.dataset.i].emoji=inp.value||'📝'});save();document.getElementById('saveHabitsBtn').style.display='none'});
 document.getElementById('saveMoodsBtn').addEventListener('click',()=>{document.querySelectorAll('.mood-lbl-inp').forEach(inp=>{config.moods[+inp.dataset.i].label=inp.value||'Unnamed'});document.querySelectorAll('.mood-emoji-inp').forEach(inp=>{config.moods[+inp.dataset.i].emoji=inp.value||'❓'});document.querySelectorAll('.mood-clr-inp').forEach(inp=>{config.moods[+inp.dataset.i].color=inp.value});save();document.getElementById('saveMoodsBtn').style.display='none'});
-document.getElementById('resetAllBtn').addEventListener('click',()=>{if(confirm('Delete all data?')){allData={};config={title:'Being New Version of Me Challenge',name:'Krishna',habits:JSON.parse(JSON.stringify(DEF_HABITS)),moods:JSON.parse(JSON.stringify(DEF_MOODS))};save();buildHome();buildSettings()}});
+document.getElementById('resetAllBtn').addEventListener('click',()=>{if(confirm('Delete all data?')){allData={};config={title:'Being New Version of Me Challenge',name:'Krishna',welcomeMsg:'Small steps, big changes. You\'re doing great!',habits:JSON.parse(JSON.stringify(DEF_HABITS)),moods:JSON.parse(JSON.stringify(DEF_MOODS))};save();buildHome();buildSettings()}});
+
+/* ── Welcome Popup ── */
+let welcomeShown=false;
+function showWelcome(){
+if(welcomeShown)return;
+welcomeShown=true;
+document.getElementById('welcomeTitle').textContent=`Welcome back, ${config.name}!`;
+document.getElementById('welcomeMsg').textContent=config.welcomeMsg;
+document.getElementById('welcomeBackdrop').classList.add('active');
+}
+document.getElementById('welcomeClose').addEventListener('click',()=>{
+document.getElementById('welcomeBackdrop').classList.remove('active');
+});
 
 document.getElementById('sidebarDate').textContent=`${MONTHS[CM]} ${CY}`;
-load();loadPrefs();buildHome();
+load();loadPrefs();buildHome();showWelcome();
 </script>
 </body>
 </html>
