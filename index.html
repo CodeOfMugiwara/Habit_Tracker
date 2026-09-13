@@ -333,9 +333,9 @@ const DEF_MOODS=[
 {label:'Very Happy',emoji:'😊',color:'#34D399',value:5},
 {label:'Happy',emoji:'😄',color:'#86D6BF',value:4},
 {label:'Okay',emoji:'😐',color:'#818CF8',value:3},
-{label:'Sad',emoji:'😔',color:'#FBBF24',value:2},
-{label:'Very Sad',emoji:'😢',color:'#F87171',value:1},
-{label:'F***ed up',emoji:'🤯',color:'#F472B6',value:0}
+{label:'Tired',emoji:'😴',color:'#A78BFA',value:2},
+{label:'Sad',emoji:'😔',color:'#FBBF24',value:1},
+{label:'Fu*ked UP',emoji:'🤯',color:'#F87171',value:0}
 ];
 const ST_ICONS={d:'✓',m:'✗',p:'~'};
 const ST_CYCLE=['','d','p','m'];
@@ -356,7 +356,7 @@ function gmd(k){if(!allData[k])allData[k]={habits:{},mood:{},notes:{}};return al
 function dim(y,m){return new Date(y,m+1,0).getDate()}
 function fdo(y,m){return new Date(y,m,1).getDay()}
 
-function load(){try{const s=localStorage.getItem(SK);if(s){const p=JSON.parse(s);allData=p.data||{};if(p.cfg){config.title=p.cfg.t||config.title;config.name=p.cfg.n||config.name;config.habits=p.cfg.h||config.habits;config.moods=p.cfg.m||config.moods}}}catch(e){}}
+function load(){try{const s=localStorage.getItem(SK);if(s){const p=JSON.parse(s);allData=p.data||{};if(p.cfg){config.title=p.cfg.t||config.title;config.name=p.cfg.n||config.name;config.habits=p.cfg.h||config.habits;config.moods=JSON.parse(JSON.stringify(DEF_MOODS))}}}catch(e){}}
 function save(){try{localStorage.setItem(SK,JSON.stringify({data:allData,cfg:{t:config.title,n:config.name,h:config.habits,m:config.moods},dark:document.body.dataset.theme==='dark',gh:graphHoverOn}))}catch(e){}}
 function loadPrefs(){try{const s=localStorage.getItem(SK);if(s){const p=JSON.parse(s);if(p.dark)setDark(true);if(p.gh===false)setGH(false)}}catch(e){}}
 
@@ -669,7 +669,7 @@ document.getElementById('setupName').value=config.name;
 const hc=document.getElementById('setupHabits');hc.innerHTML='';
 config.habits.forEach((h,i)=>{
 const item=document.createElement('div');item.className='setup-item';item.dataset.i=i;
-item.innerHTML=`<span class="drag-handle" data-t="h" data-i="${i}">⠿</span><input type="text" value="${h.emoji}" class="emoji-inp habit-emoji" data-i="${i}"><input type="text" value="${h.name}" class="habit-name-inp" data-i="${i}"><button class="btn btn-d btn-sm" onclick="rmHabit(${i})">✕</button>`;
+item.innerHTML=`<span class="drag-handle" data-t="h" data-i="${i}">⠿</span><input type="text" value="${h.emoji}" class="emoji-inp habit-emoji-inp" data-i="${i}"><input type="text" value="${h.name}" class="habit-name-inp" data-i="${i}"><button class="btn btn-d btn-sm" onclick="rmHabit(${i})">✕</button>`;
 hc.appendChild(item);
 });
 const mc=document.getElementById('setupMoods');mc.innerHTML='';
@@ -688,7 +688,16 @@ document.querySelectorAll('.setup-item').forEach(item=>{
 item.addEventListener('dragstart',function(e){this.classList.add('dragging');e.dataTransfer.setData('text/plain',JSON.stringify({t:this.querySelector('.drag-handle').dataset.t,i:+this.dataset.i}))});
 item.addEventListener('dragend',function(){this.classList.remove('dragging');this.setAttribute('draggable','false')});
 item.addEventListener('dragover',e=>e.preventDefault());
-item.addEventListener('drop',function(e){e.preventDefault();try{const p=JSON.parse(e.dataTransfer.getData('text/plain'));const from=p.i,to=+this.dataset.i;if(from!==to){if(p.t==='h'){const m=config.habits.splice(from,1)[0];config.habits.splice(to,0,m)}else{const m=config.moods.splice(from,1)[0];config.moods.splice(to,0,m)}buildSettings()}}catch(x){}});
+item.addEventListener('drop',function(e){e.preventDefault();try{const p=JSON.parse(e.dataTransfer.getData('text/plain'));const from=p.i,to=+this.dataset.i;if(from!==to){
+// Sync inputs to config before reorder
+document.querySelectorAll('.habit-name-inp').forEach(inp=>{config.habits[+inp.dataset.i].name=inp.value||'Unnamed'});
+document.querySelectorAll('.habit-emoji-inp').forEach(inp=>{config.habits[+inp.dataset.i].emoji=inp.value||'📝'});
+document.querySelectorAll('.mood-lbl-inp').forEach(inp=>{config.moods[+inp.dataset.i].label=inp.value||'Unnamed'});
+document.querySelectorAll('.mood-emoji-inp').forEach(inp=>{config.moods[+inp.dataset.i].emoji=inp.value||'❓'});
+document.querySelectorAll('.mood-clr-inp').forEach(inp=>{config.moods[+inp.dataset.i].color=inp.value});
+if(p.t==='h'){const m=config.habits.splice(from,1)[0];config.habits.splice(to,0,m)}
+else{const m=config.moods.splice(from,1)[0];config.moods.splice(to,0,m)}
+save();buildSettings()}}catch(x){}});
 });
 document.getElementById('saveHabitsBtn').style.display='none';
 document.getElementById('saveMoodsBtn').style.display='none';
